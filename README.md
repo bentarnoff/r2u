@@ -4,15 +4,19 @@ A tool to convert URIs to Docs repo names, and vice versa.
 
 ###Setup
 
-`git clone https://github.com/bentarnoff/r2u.git`
-`cd r2u`
-`bundle install`
+```
+git clone https://github.com/bentarnoff/r2u.git
+cd r2u
+bundle install
+```
 
 ###Usage
-`ruby r2u.rb [URI or repo name]`
+`ruby r2u.rb [URI or repo name]`  
+
 **Converts a URI to a repo name, and vice versa**
 
-`ruby r2u.rb --all`
+`ruby r2u.rb --all`  
+
 **Prints the whole hash**
 
 ###Example
