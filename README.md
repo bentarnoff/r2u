@@ -31,11 +31,11 @@ http://docs.cloudfoundry.org/services/
 ###Add it to your bash_profile
 
 ```
-$ echo "alias r2u='ruby ~/workspace/r2u.rb' >> ~/.bash_profile
+$ echo "alias r2u='ruby ~/workspace/r2u.rb'" >> ~/.bash_profile
 ```
 
 Now you can run it with:
 
 ```
-$r2u
+$ r2u
 ```
