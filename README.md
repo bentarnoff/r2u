@@ -1,6 +1,6 @@
 #r2u
 
-##A tool to convert URIs to Docs repo names, and vice versa.
+A tool to convert URIs to Docs repo names, and vice versa.
 
 ###Setup
 
