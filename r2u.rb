@@ -1,61 +1,43 @@
 require 'uri'
 require 'colorize'
+require 'yaml'
 
-@bigboy = {
-	:'docs-app-distribution' => "http://docs.pivotal.io/app-dist/",
-	:'docs-appydynamics' => "http://docs.pivotal.io/appdynamics/",
-	:'docs-book-cloudfoundry' => "http://docs.cloudfoundry.org/",
-	:'docs-book-pivotalcf' => "http://docs.pivotal.io/",
-	:'docs-bosh' => "http://bosh.io/docs/",
-	:'docs-buildpacks' => ["http://docs.pivotal.io/pivotalcf/buildpacks/", "http://docs.run.pivotal.io/buildpacks/", "http://docs.cloudfoundry.org/buildpacks/"], 
-	:'docs-cassandra' => "http://docs.pivotal.io/cassandra/",
-	:'docs-cf-admin' => ["http://docs.pivotal.io/pivotalcf/adminguide/", "http://docs.cloudfoundry.org/adminguide/"],
-	:'docs-cf-cli' => ["http://docs.pivotal.io/pivotalcf/cf-cli/", "http://docs.run.pivotal.io/cf-cli/", "http://docs.cloudfoundry.org/cf-cli/"],
-	:'docs-cloudbees' => "http://docs.pivotal.io/cloudbees/Jenkins.html",
-	:'docs-cloudbees-cjoc' => "http://docs.pivotal.io/cjoc/Jenkins.html",
-	:'docs-cloudfoundry-concepts' => ["http://docs.pivotal.io/pivotalcf/concepts/", "http://docs.run.pivotal.io/concepts/", "http://docs.cloudfoundry.org/concepts/"],
-	:'docs-deploying-cf' =>"http://docs.cloudfoundry.org/deploying/",
-	:'docs-dev-guide' => ["http://docs.pivotal.io/pivotalcf/devguide/", "http://docs.run.pivotal.io/devguide/", "http://docs.cloudfoundry.org/devguide/"],
-	:'docs-elk-stayupio' => "http://docs.pivotal.io/elk/",
-	:'docs-gemfire-cf' => "http://docs.pivotal.io/gemfire-cf/",
-	:'docs-gitlab' => "http://docs.pivotal.io/gitlab/",
-	:'docs-identity' => "http://docs.pivotal.io/p-identity/",
-	:'docs-jfrog' => "http://docs.pivotal.io/jfrog/",
-	:'docs-klacloud' => "http://docs.pivotal.io/knowtify/",
-	:'docs-loggregator' => ["http://docs.pivotal.io/pivotalcf/loggregator/", "http://docs.cloudfoundry.org/loggregator/"],
-	:'docs-mongodb' => "http://docs.pivotal.io/mongodb/",
-	:'docs-mysql' => "http://docs.pivotal.io/p-mysql/",
-	:'docs-neo4j' => "http://docs.pivotal.io/neo4j/",
-	:'docs-new-relic' => "http://docs.pivotal.io/newrelic/",
-	:'docs-ops-guide' => "http://docs.pivotal.io/pivotalcf/opsguide/",
-	:'docs-partners' => "http://docs.pivotal.io/partners/",
-	:'docs-pcf-gsg' => "http://docs.pivotal.io/pivotalcf/getstarted/",
-	:'docs-pcf-install' => "http://docs.pivotal.io/pivotalcf/customizing/",
-	:'docs-pcf-mobileservices' => "http://docs.pivotal.io/mobile/",
-	:'docs-phd-ds' => "http://docs.pivotal.io/pivotalhd-ds/",
-	:'docs-hd-staging' => "http://pivotalhd.docs.pivotal.io/",
-	:'docs-pivotalcf-console' => "http://docs.pivotal.io/pivotalcf/console/",
-	:'docs-push-notifications' => "http://docs.pivotal.io/push/",
-	:'docs-pws-gsg' => "http://docs.run.pivotal.io/starting/",
-	:'docs-pws-release-notes' => "http://docs.run.pivotal.io/release-notes/",
-	:'docs-pws-services' => "http://docs.run.pivotal.io/marketplace/",
-	:'docs-rabbitmq-staging' => "http://docs.pivotal.io/rabbitmq-cf/",
-	:'docs-redis' => "http://docs.pivotal.io/redis/",
-	:'docs-riakcs' => "http://docs.pivotal.io/p-riakcs/",
-	:'docs-running-cf' => "http://docs.cloudfoundry.org/running/",
-	:'docs-services' => ["http://docs.pivotal.io/pivotalcf/services/", "http://docs.run.pivotal.io/services/", "http://docs.cloudfoundry.org/services/"],	
-	:'docs-spring-cloud-data-flow' => "http://docs.pivotal.io/spring-cloud-data-flow/",
-	:'docs-spring-cloud-services' => "http://docs.pivotal.io/spring-flo/",
-	:'docs-spring-xd' => "http://docs.pivotal.io/spring-xd",
-	:'docs-ssc-gemfire-cf' => "http://docs.pivotal.io/ssc-gemfire/",
-	:'docs-tracker-pcf' => "http://docs.pivotal.io/tracker-pcf/",
-	:'pcf-release-notes' => "http://docs.pivotal.io/pivotalcf/pcf-release-notes/"
-}
+@bigboy = Hash.new
 
+#build the hash
+def parse_yaml(path, domain)
+book = begin
+  YAML.load(File.open(path))
+rescue ArgumentError => e
+  puts "Could not parse YAML: #{e.message}"
+end
+book["sections"].each do |n|
+	repo = n['repository']['name']
+	repo = repo.split('/')[1] if repo.include?('/')
+	uri = domain + n['directory']
+	if @bigboy.has_key?(repo.to_sym)
+		if @bigboy[repo.to_sym].is_a?(Array)
+			@bigboy[repo.to_sym].push(uri)
+		else
+			@bigboy[repo.to_sym] = @bigboy[repo.to_sym].split.push(uri)
+		end
+	else
+		@bigboy[repo.to_sym] = uri
+	end	
+end
+end
+
+parse_yaml('~/workspace/docs-book-pivotalcf/config.yml', 'http://docs.pivotal.io/')
+parse_yaml('~/workspace/docs-book-cloudfoundry/config.yml', 'http://docs.cloudfoundry.org/')
+parse_yaml('~/workspace/docs-book-runpivotal/config.yml', 'http://docs.run.pivotal.io/')
+
+
+#convert a uri to a repo
 def uri_to_repo(uri)
 	parsed = URI.parse(uri)
 	new_uri = parsed.to_s
 	new_uri.gsub!("https", "http") if parsed.scheme == "https"
+	new_uri.chop! if new_uri[-1] == "/"
 	if @bigboy.value?(new_uri)
 		puts "\nThe repo for " + "#{ARGV[0]} ".green + "is " + "#{@bigboy.key(new_uri)}".red
 	elsif @bigboy.values.flatten.include?(new_uri)
@@ -67,6 +49,7 @@ def uri_to_repo(uri)
 	end
 end
 
+#convert a repo to a uri
 def repo_to_uri(repo)
 	if @bigboy.key?(repo.to_sym)
 		if @bigboy[repo.to_sym].is_a?(Array)
@@ -80,6 +63,7 @@ def repo_to_uri(repo)
 	end
 end
 
+#arguments
 if ARGV[0] =~ URI.regexp
 	uri_to_repo(ARGV[0])
 elsif ARGV[0] =~ /[a-z]{3,4}-[a-z]+/

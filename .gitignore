@@ -1,0 +1,5 @@
+docs-book-cloudfoundry
+docs-book-pivotalcf
+docs-book-runpivotal
+.DS_Store
+Gemfile.lock
