@@ -27,9 +27,11 @@ book["sections"].each do |n|
 end
 end
 
-parse_yaml('~/workspace/docs-book-pivotalcf/config.yml', 'http://docs.pivotal.io/')
-parse_yaml('~/workspace/docs-book-cloudfoundry/config.yml', 'http://docs.cloudfoundry.org/')
-parse_yaml('~/workspace/docs-book-runpivotal/config.yml', 'http://docs.run.pivotal.io/')
+puts Dir.home
+
+parse_yaml(Dir.home + '/workspace/docs-book-pivotalcf/config.yml', 'http://docs.pivotal.io/')
+parse_yaml(Dir.home + '/workspace/docs-book-cloudfoundry/config.yml', 'http://docs.cloudfoundry.org/')
+parse_yaml(Dir.home + '/workspace/docs-book-runpivotal/config.yml', 'http://docs.run.pivotal.io/')
 
 
 #convert a uri to a repo
